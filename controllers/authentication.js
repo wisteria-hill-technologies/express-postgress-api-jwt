@@ -53,7 +53,7 @@ exports.signup = async (req, res, next) => {
     );
   } catch (err) {
     console.error(err.message);
-    res.json({ "error": err.message });
+    res.status(500).json({ "error": err.message });
   }
 
   // If the user already exists, then return an error.
@@ -70,7 +70,7 @@ exports.signup = async (req, res, next) => {
     );
   } catch (err) {
     console.error(err.message);
-    res.json({ "error": err.message });
+    res.status(500).json({ "error": err.message });
   }
   // Use CreateUserToken function at the top of this file. Create a User JWT token and send it back as a response.
   return res.json({ token: createUserToken(newUser.rows[0]) });
@@ -119,14 +119,14 @@ exports.JWTAuth = async (req, res, next) => {
   try {
     decodedToken = jwt.decode(token, process.env.JWT_SECRET);
   } catch (err) {
-    res.json({ "error": err.message });
+    res.status(401).json({ "error": err.message });
   }
   const currentTime = new Date().getTime();
   const minute = 1000 * 60;
-  const expiryDuration = 30 * minute;
+  const expiryDuration = 60 * minute;
   const timeEllapsed = currentTime - decodedToken.iat;
   if (timeEllapsed > expiryDuration) {
-    res.json({ "error": "Token expired" });
+    res.status(401).json({ "error": "Token expired" });
   }
 
   let user = null;
@@ -137,13 +137,13 @@ exports.JWTAuth = async (req, res, next) => {
     );
   } catch (err) {
     console.error(err.message);
-    if (err) { res.json({ "error": err.message }); } // if it returns error, return done with the error and false.
+    if (err) { res.status(500).json({ "error": err.message }); } // if it returns error, return done with the error and false.
   }
 
   //If user exists, call done with no error (null) and the user object.
   if(user.rows[0]){
     next();
   } else { // Otherwise, call done with no error and false.
-    res.json({ "error": err.message });
+    res.status(401).json({ "error": err.message });
   }
 };

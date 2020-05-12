@@ -177,6 +177,16 @@ app.delete("/items", JWTAuth, async (req, res) => {
   }
 });
 
+app.get("/users", JWTAuth, async (req, res) => {
+  try {
+    const allUsers = await pool.query("SELECT * FROM users");
+    res.json(allUsers.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.json({ "error": err.message });
+  }
+});
+
 app.listen(5000, () => {
   console.log("server has started on port 5000");
 });
